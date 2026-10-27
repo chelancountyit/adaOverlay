@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ADA Accessibility Overlay Demo | CMSAdmin 2.0</title>
+  <style>
+    :root {
+      --primary: #1d2b44;
+      --primary-accent: #2563eb;
+      --surface: #ffffff;
+      --bg: #f8fafc;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #e2e8f0;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Visually hidden utility (from modern-web-guidance accessibility guide) */
+    .visually-hidden:where(:not(:focus-within, :active)) {
+      position: absolute !important;
+      clip-path: inset(50%) !important;
+      overflow: hidden !important;
+      width: 1px !important;
+      height: 1px !important;
+      margin: -1px !important;
+      padding: 0 !important;
+      border: 0 !important;
+      white-space: nowrap !important;
+    }
+
+    .skip-link:focus {
+      position: fixed;
+      inset-block-start: 12px;
+      inset-inline-start: 12px;
+      z-index: 9999;
+      background: var(--primary);
+      color: #ffffff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      outline: 3px solid #ff6b00;
+    }
+
+    /* Top Header & Navigation */
+    header.site-header {
+      background: var(--primary);
+      color: #ffffff;
+      padding: 16px 24px;
+      border-block-end: 4px solid #d97706;
+    }
+
+    .header-inner {
+      max-inline-size: 1180px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #ffffff;
+      text-decoration: none;
+    }
+
+    .brand-badge {
+      background: #d97706;
+      color: #ffffff;
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    nav[aria-label="Primary"] ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    nav[aria-label="Primary"] a {
+      color: #f1f5f9;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      padding: 6px 8px;
+      border-radius: 6px;
+    }
+
+    nav[aria-label="Primary"] a:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .header-ada-btn {
+      background: #ffffff;
+      color: var(--primary);
+      border: none;
+      border-radius: 999px;
+      padding: 8px 16px;
+      min-block-size: 38px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .header-ada-btn:hover {
+      background: #f1f5f9;
+    }
+
+    /* Main Content Layout */
+    main {
+      max-inline-size: 1180px;
+      margin: 32px auto;
+      padding: 0 24px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #1d2b44 0%, #2a4365 100%);
+      color: #ffffff;
+      border-radius: 18px;
+      padding: 36px 32px;
+      margin-block-end: 28px;
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 28px;
+      align-items: center;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+    }
+
+    @media (max-width: 820px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .hero h1 {
+      margin: 0 0 12px;
+      font-size: 2rem;
+      line-height: 1.25;
+    }
+
+    .hero p {
+      margin: 0 0 20px;
+      color: #e2e8f0;
+      font-size: 1.05rem;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn {
+      background: #2563eb;
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 18px;
+      min-block-size: 40px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+
+    .btn:hover {
+      background: #1d4ed8;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #ffffff;
+      color: var(--primary);
+      border: 1px solid #cbd5e1;
+    }
+
+    .btn-secondary:hover {
+      background: #f1f5f9;
+    }
+
+    /* Animated Demo Card to test Seizure Safety / Stop Animations */
+    .pulse-card {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .animated-orb {
+      inline-size: 56px;
+      block-size: 56px;
+      margin: 0 auto 12px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, #38bdf8, #f59e0b, #ec4899, #38bdf8);
+      animation: spinOrb 3s linear infinite;
+    }
+
+    @keyframes spinOrb {
+      from { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.12); }
+      to { transform: rotate(360deg) scale(1); }
+    }
+
+    /* JS API Sandbox Grid */
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 22px;
+      margin-block-end: 32px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+
+    .card h2 {
+      margin-block-start: 0;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+
+    pre.code-block {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 14px;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    table.demo-table {
+      inline-size: 100%;
+      border-collapse: collapse;
+      margin-block-start: 12px;
+      font-size: 0.92rem;
+    }
+
+    table.demo-table caption {
+      text-align: left;
+      font-weight: 700;
+      margin-block-end: 8px;
+      color: var(--primary);
+    }
+
+    table.demo-table th,
+    table.demo-table td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+    }
+
+    table.demo-table th {
+      background: #f1f5f9;
+    }
+
+    footer.site-footer {
+      background: #0f172a;
+      color: #cbd5e1;
+      padding: 28px 24px;
+      margin-block-start: 48px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    footer.site-footer a {
+      color: #38bdf8;
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link visually-hidden">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="#main-content" class="brand">
+        <span>CMSAdmin 2.0 Portal</span>
+        <span class="brand-badge">ADA MODULE</span>
+      </a>
+
+      <nav aria-label="Primary">
+        <ul role="list">
+          <li><a href="#features">Departments</a></li>
+          <li><a href="#services">Public Services</a></li>
+          <li><a href="#api-demo">JavaScript API</a></li>
+          <li>
+            <button type="button" class="header-ada-btn" onclick="ADAOverlay.open()">
+              <span>♿ Accessibility Tools</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="main-content">
+      <div>
+        <h1 id="main-content" tabindex="-1">Standalone Reusable ADA Accessibility Overlay</h1>
+        <p>
+          Click the circular navy accessibility icon in the bottom-right corner—or use the JavaScript API buttons below—to launch the
+          <strong>Accessibility Adjustments</strong> overlay modeled after <code>co.chelan.wa.us</code>.
+        </p>
+        <div class="btn-row">
+          <button type="button" class="btn" onclick="ADAOverlay.open()">
+            Open Overlay via JS (<code>ADAOverlay.open()</code>)
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="ADAOverlay.setProfile('adhd', true); ADAOverlay.open();">
+            Test ADHD Profile
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="ADAOverlay.reset()">
+            Reset All Settings
+          </button>
+        </div>
+      </div>
+
+      <div class="pulse-card">
+        <div class="animated-orb" role="img" aria-label="Spinning color orb animation"></div>
+        <strong>Motion &amp; Visual Trigger Test</strong>
+        <p style="font-size: 0.88rem; margin: 6px 0 0;">
+          Toggle <strong>Seizure Safety</strong> or <strong>Stop Animations</strong> inside the overlay to pause this continuous CSS animation immediately.
+        </p>
+      </div>
+    </section>
+
+    <div class="grid-cards" id="api-demo">
+      <!-- Card 1: Programmatic API Controls -->
+      <article class="card">
+        <h2>Programmatic JavaScript Triggering</h2>
+        <p>
+          In <strong>CMSAdmin 2.0</strong> (or any website), you can call <code>window.ADAOverlay</code> methods from any custom button, menu item, or script:
+        </p>
+        <div class="btn-row" style="margin-block-bottom: 14px;">
+          <button type="button" class="btn" onclick="ADAOverlay.toggle()">Toggle Panel</button>
+          <button type="button" class="btn btn-secondary" onclick="ADAOverlay.setProfile('seizure', true)">Enable Seizure Safety</button>
+          <button type="button" class="btn btn-secondary" onclick="ADAOverlay.setProfile('lowVision', true)">Enable Low Vision</button>
+          <button type="button" class="btn btn-secondary" onclick="ADAOverlay.setProfile('olderAdults', true)">Enable Older Adults</button>
+        </div>
+        <pre class="code-block"><code>// Drop-in script on any website:
+&lt;script src="ada-overlay.js" defer&gt;&lt;/script&gt;
+
+// Or invoke via JavaScript anywhere:
+ADAOverlay.open();
+ADAOverlay.setProfile('lowVision', true);
+ADAOverlay.reset();</code></pre>
+      </article>
+
+      <!-- Card 2: Widget Position & Branding Sandbox -->
+      <article class="card" id="features">
+        <h2>Live Configuration &amp; Corner Position</h2>
+        <p>
+          Test moving the floating accessibility icon or hiding it so only your custom CMSAdmin 2.0 header button opens the overlay:
+        </p>
+        <div class="btn-row" style="margin-block-end: 14px;">
+          <button type="button" class="btn btn-secondary" onclick="ADAOverlay.init({ position: 'bottom-right', showTrigger: true })">Bottom Right</button>
+          <button type="button" class="btn btn-secondary" onclick="ADAOverlay.init({ position: 'bottom-left', showTrigger: true })">Bottom Left</button>
+          <button type="button" class="btn btn-secondary" onclick="ADAOverlay.init({ position: 'top-right', showTrigger: true })">Top Right</button>
+          <button type="button" class="btn btn-secondary" onclick="ADAOverlay.init({ showTrigger: false })">Hide Floating Icon</button>
+        </div>
+        <p>
+          Try hovering over this paragraph with <strong>Text Magnifier</strong> enabled, or test <a href="#services">Highlight Links</a> and <strong>Highlight Titles</strong> to see how page elements respond while the Shadow DOM widget stays crisp and unaffected.
+        </p>
+      </article>
+
+      <!-- Card 3: Sample Municipal Content & Table -->
+      <article class="card" id="services">
+        <h2>County Public Services Directory</h2>
+        <p>
+          Use this sample content to test <strong>Content Scaling</strong>, <strong>Readable Font</strong>, <strong>Color Swatches</strong>, and <strong>Reading Mask</strong>.
+        </p>
+        <table class="demo-table">
+          <caption>Public Counter Hours &amp; Contact Links</caption>
+          <thead>
+            <tr>
+              <th scope="col">Department</th>
+              <th scope="col">Hours</th>
+              <th scope="col">Online Portal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Community Development</th>
+              <td>8:00 AM – 5:00 PM</td>
+              <td><a href="#permits">Permit Center</a></td>
+            </tr>
+            <tr>
+              <th scope="row">Auditor &amp; Elections</th>
+              <td>8:30 AM – 4:30 PM</td>
+              <td><a href="#elections">Voter Portal</a></td>
+            </tr>
+            <tr>
+              <th scope="row">Public Works</th>
+              <td>7:30 AM – 4:00 PM</td>
+              <td><a href="#roads">Road Alerts</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p>
+      CMSAdmin 2.0 Reusable Accessibility Module Demo • Press <kbd>Alt + 1</kbd> at any time or <a href="#main-content" onclick="event.preventDefault(); ADAOverlay.open();">Open Accessibility Adjustments</a>
+    </p>
+  </footer>
+
+  <!-- Standalone Reusable ADA Overlay Script -->
+  <script src="ada-overlay.js"></script>
+</body>
+</html>
+
